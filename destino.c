@@ -15,6 +15,10 @@ enum estados {
   encerrado
 }
 
+// Configurações Iniciais
+const char *service;
+struct addrinfo addrCriteria
+
 // Tamanho do buffer
 static const int BUFSIZE = 512;
 
@@ -26,7 +30,6 @@ int meuListen() {
 
 // Criação do Socket
 int meuSocket() {
-  struct addrinfo addrCriteria;
   memset(&addrCriteria, 0, sizeof(addrCriteria));
   addrCriteria.ai_family = AF_UNSPEC;
   addrCriteria.ai_flags = AI_PASSIVE;
@@ -56,6 +59,30 @@ int meuSocket() {
     // Função meuListen()
     if (meuListen() == 0)
       break;
+
+    int sendMsg, recvMsg;
+    int len;
+    const char msgSend = "SYNACK";
+    char buffer[BUFFER];
+
+    struct sockaddr_storage recv_addr;
+    socklen_t addr_len = sizeof recv_addr;
+    
+    puts("Esperando conexão");
+    recvMsg = recvfrom(sock, buffer, BUFFER, 0, (struct sockaddr *)&recv_addr, &addr_len);
+    if (recvMsg < 0) {
+        perror("Erro ao receber mensagem.\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    if (strcmp(buffer, "SYN") == 0) {
+        sendMsg = sendto(sock, msgSend, sizeof(&msgSend), 0, addr->ai_addr, addr->ai_addrlen);
+        if (sendMsg < 0) {
+            perror("Erro ao enviar mensagem.\n");
+            exit(EXIT_FAILURE);
+        }
+        puts("Conexão aceita!");
+    }
       
     close(servSock);
     servSock = -1;
