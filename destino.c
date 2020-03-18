@@ -1,4 +1,4 @@
-// Bibliotecas
+// BIBLIOTECAS
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -7,142 +7,148 @@
 #include <string.h>
 #include <unistd.h>
 
-// Maquina de Estados: para gerênciar o funcionamento da aplicação
+// DEFINIÇÕES
+#define PORT "5002"
+#define BUFFER 512
+
+// STRUCTS
+struct addrinfo *addr;
+
+struct sockaddr_storage recv_addr;
+socklen_t addr_len = sizeof recv_addr;
+
+// ESTADOS
 enum estados {
-  iniciando,
-  comunicando,
-  finalizando,
-  encerrado
+	iniciando,
+	comunicando,
+	finalizando,
+	encerrado
+};
+
+// DECLARAÇÕES DE FUNÇÕES
+int meuListen();
+int meuAccept(int sock, struct addrinfo *addr);
+int meuSend(int sock, char *msg, int msgLen);
+int meuRecv(int sock, char *buffer, int BUFSIZE);
+int meuSocket();
+
+// FUNÇÃO MAIN
+int main(int argc, char const *argv[]){
+    int estado_atual = iniciando;
+    int servSock, clntSock;
+
+    while (estado_atual != encerrado){
+
+        switch (estado_atual){
+            case iniciando:
+                servSock = meuSocket();
+                estado_atual = comunicando;
+                break;
+            case comunicando:
+                estado_atual = finalizando;
+                break;
+            case finalizando:
+                estado_atual = encerrado;
+                close(servSock);
+                break;
+            default:
+                break;
+        }
+    }
+
+    return EXIT_SUCCESS;
 }
 
-// Configurações Iniciais
-const char *service;
-struct addrinfo addrCriteria
-
-// Tamanho do buffer
-static const int BUFSIZE = 512;
-
-// Criação da Função meuListen();
-int meuListen() {
-  puts("-> Iniciando escuta;\n");
-  return 0;
+// DEMAIS FUNÇÕES
+int meuListen(){
+    puts("Iniciando escuta...");
+    return 0;
 }
 
-// Criação do Socket
-int meuSocket() {
-  memset(&addrCriteria, 0, sizeof(addrCriteria));
-  addrCriteria.ai_family = AF_UNSPEC;
-  addrCriteria.ai_flags = AI_PASSIVE;
-  addrCriteria.ai_socktype = SOCK_DGRAM;
-  addrCriteria.ai_protocol = IPPROTO_UDP;
-  
-  struct addrinfo *servAddr;
-  int rtnVal = getaddrinfo(NULL, service, &addrCriteria, &servAddr);
-  
-  if (rtnVal != 0) {
-    perror("getaddrinfo() falhou\n");
-    exit(EXIT_FAILURE);
-  }
-  
-  int servSock = -1;
-  
-  for (struct addrinfo *addr = servAddr; addr != NULL; addr = addr->ai_next) {
-    servSock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
-    
-    if (servSock < 0)
-      continue;
-    
-    // Função Bind()
-    if (bind(servSOck, addr->ai_addr, addr->ai_addrlen) == 0) 
-      break;
-    
-    // Função meuListen()
-    if (meuListen() == 0)
-      break;
-
+int meuAccept(int sock, struct addrinfo *addr) {
     int sendMsg, recvMsg;
-    int len;
-    const char msgSend = "SYNACK";
+    const char *msgSend = "SYNACK";
+    const char *msgTest = "TESTADO";
     char buffer[BUFFER];
 
-    struct sockaddr_storage recv_addr;
-    socklen_t addr_len = sizeof recv_addr;
-    
-    puts("Esperando conexão");
+    puts("Esperando conexão...");
+
     recvMsg = recvfrom(sock, buffer, BUFFER, 0, (struct sockaddr *)&recv_addr, &addr_len);
+    printf("Recebi ");
+    fputs(buffer, stdout);
+    puts("\n");
+
     if (recvMsg < 0) {
         perror("Erro ao receber mensagem.\n");
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
-    
+
     if (strcmp(buffer, "SYN") == 0) {
-        sendMsg = sendto(sock, msgSend, sizeof(&msgSend), 0, addr->ai_addr, addr->ai_addrlen);
+        sendMsg = sendto(sock, msgSend, sizeof(&msgSend), 0, (struct sockaddr *)&recv_addr, addr_len);
+
         if (sendMsg < 0) {
             perror("Erro ao enviar mensagem.\n");
-            exit(EXIT_FAILURE);
+            return EXIT_FAILURE;
         }
-        puts("Conexão aceita!");
+        printf("Enviei %s\n", msgSend);
+        puts("Conexão aceita.");
     }
-      
-    close(servSock);
-    servSock = -1;
-  }
-  
-  freeaddrinfo(servAddr);
-  
-  return servSock;
+
+    printf("\nEnviei %s\n", msgTest);
+    meuSend(sock, msgTest, sizeof(msgTest));
+    meuRecv(sock, buffer, sizeof(buffer));
+    printf("Recebi ");
+    fputs(buffer, stdout);
+    puts("\n");
+
+    return 0;
 }
 
-int main(int argc, char const *argv[]) {
-  if (argc != 2) {
-    perror("Execução correta: ./destino <porta>\n");
-    return EXIT_FAILURE;
-  }
-  
-  int estado_atual = iniciando;
-  int servSock, clntSock;
-  
-  while (estado_atual != encerrado) {
-    switch (estado_atual) {
-      case inicando:
-        break;
-      case comunicando:
-        break;
-      case finalizando:
-        break;
-      default: 
-        break;
-    }
-  }
-  
-  return EXIT_SUCCESS;
+int meuSend(int sock, char *msg, int msgLen){
+    int sendMsg = sendto(sock, msg, msgLen, 0, (struct sockaddr *)&recv_addr, addr_len);
+
+    return sendMsg;
+}
+int meuRecv(int sock, char *buffer, int BUFSIZE){
+    int recvMsg = recvfrom(sock, buffer, BUFSIZE, 0, (struct sockaddr *)&recv_addr, &addr_len);
+
+    return recvMsg;
 }
 
+int meuSocket() {
+	struct addrinfo addrCriteria;
+	memset(&addrCriteria, 0, sizeof(addrCriteria));
+	addrCriteria.ai_family = AF_UNSPEC;
+	addrCriteria.ai_flags = AI_PASSIVE;
+	addrCriteria.ai_socktype = SOCK_DGRAM;
+	addrCriteria.ai_protocol = IPPROTO_UDP;
 
+	struct addrinfo *servAddr;
 
+	int rtnVal = getaddrinfo(NULL, PORT, &addrCriteria, &servAddr);
 
+	if (rtnVal != 0) {
+        perror("getaddrinfo() falhou");
+        exit(EXIT_FAILURE);
+	}
 
+	int sock = -1;
 
+	for (addr = servAddr; addr != NULL; addr = addr->ai_next) {
+        sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
 
+        if (sock < 0)
+            continue;
 
+        if (bind(sock, addr->ai_addr, addr->ai_addrlen) == 0) {
+            meuAccept(sock, addr);
+            break;
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        meuListen();
+        close(sock);
+        sock = -1;
+	}
+	freeaddrinfo(servAddr);
+	return sock;
+}
