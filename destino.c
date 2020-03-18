@@ -1,45 +1,18 @@
-// BIBLIOTECAS
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <string.h>
-#include <unistd.h>
-
-// DEFINIÇÕES
-#define PORT "5002"
-#define BUFFER 512
+#include "utils.h"
 
 // STRUCTS
 struct addrinfo *addr;
-
 struct sockaddr_storage recv_addr;
+
 socklen_t addr_len = sizeof recv_addr;
 
-// ESTADOS
-enum estados {
-	iniciando,
-	comunicando,
-	finalizando,
-	encerrado
-};
-
-// DECLARAÇÕES DE FUNÇÕES
-int meuListen();
-int meuAccept(int sock, struct addrinfo *addr);
-int meuSend(int sock, char *msg, int msgLen);
-int meuRecv(int sock, char *buffer, int BUFSIZE);
-int meuSocket();
-
 // FUNÇÃO MAIN
-int main(int argc, char const *argv[]){
+int main(int argc, char const *argv[]) {
     int estado_atual = iniciando;
     int servSock, clntSock;
 
     while (estado_atual != encerrado){
-
-        switch (estado_atual){
+        switch (estado_atual) {
             case iniciando:
                 servSock = meuSocket();
                 estado_atual = comunicando;
@@ -60,7 +33,7 @@ int main(int argc, char const *argv[]){
 }
 
 // DEMAIS FUNÇÕES
-int meuListen(){
+int meuListen() {
     puts("Iniciando escuta...");
     return 0;
 }
@@ -91,27 +64,26 @@ int meuAccept(int sock, struct addrinfo *addr) {
             return EXIT_FAILURE;
         }
         printf("Enviei %s\n", msgSend);
-        puts("Conexão aceita.");
+        puts("Conexão aceita.\n");
     }
 
-    printf("\nEnviei %s\n", msgTest);
-    meuSend(sock, msgTest, sizeof(msgTest));
     meuRecv(sock, buffer, sizeof(buffer));
     printf("Recebi ");
     fputs(buffer, stdout);
-    puts("\n");
+    printf("\nEnviei %s\n", msgTest);
+    meuSend(sock, (char *)msgTest, sizeof(msgTest));
+    
 
     return 0;
 }
 
-int meuSend(int sock, char *msg, int msgLen){
+int meuSend(int sock, char *msg, int msgLen) {
     int sendMsg = sendto(sock, msg, msgLen, 0, (struct sockaddr *)&recv_addr, addr_len);
-
     return sendMsg;
 }
-int meuRecv(int sock, char *buffer, int BUFSIZE){
-    int recvMsg = recvfrom(sock, buffer, BUFSIZE, 0, (struct sockaddr *)&recv_addr, &addr_len);
 
+int meuRecv(int sock, char *buffer, int BUFSIZE) {
+    int recvMsg = recvfrom(sock, buffer, BUFSIZE, 0, (struct sockaddr *)&recv_addr, &addr_len);
     return recvMsg;
 }
 
@@ -125,7 +97,7 @@ int meuSocket() {
 
 	struct addrinfo *servAddr;
 
-	int rtnVal = getaddrinfo(NULL, PORT, &addrCriteria, &servAddr);
+	int rtnVal = getaddrinfo(NULL, PORT_DESTINY, &addrCriteria, &servAddr);
 
 	if (rtnVal != 0) {
         perror("getaddrinfo() falhou");
@@ -141,11 +113,11 @@ int meuSocket() {
             continue;
 
         if (bind(sock, addr->ai_addr, addr->ai_addrlen) == 0) {
+            meuListen();
             meuAccept(sock, addr);
             break;
         }
 
-        meuListen();
         close(sock);
         sock = -1;
 	}
