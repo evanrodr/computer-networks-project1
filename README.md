@@ -11,14 +11,14 @@ The project also specifies that we need to implement a fake "tcp" over a real UD
 
 ### Script Compilation
 
-```bash
+```shell-script
 chmod +x compiler.sh
 ./compiler.sh
 ```
 
 ### Manual Compilation
 
-```bash
+```shell-script
 gcc comutador.c -o comutador
 gcc destino.c -o destino
 gcc origem.c -o origem
@@ -28,7 +28,7 @@ gcc origem.c -o origem
 
 In three separate terminals, run:
 
-```bash
+```shell-script
 ./comutador
 ./destino
 ./origem
