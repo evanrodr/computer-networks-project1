@@ -33,4 +33,3 @@ In three separate terminals, run:
 ./destino
 ./origem
 ```
-
