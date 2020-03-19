@@ -1,4 +1,4 @@
-# Computer Networks - Project 1 ***
+# Computer Networks - Project 1
 
 First **Computer Networks** project implementation.
 
@@ -11,14 +11,14 @@ The project also specifies that we need to implement a fake "tcp" over a real UD
 
 ### Script Compilation
 
-```shell
+```bash
 chmod +x compiler.sh
 ./compiler.sh
 ```
 
 ### Manual Compilation
 
-```shell
+```bash
 gcc comutador.c -o comutador
 gcc destino.c -o destino
 gcc origem.c -o origem
@@ -28,7 +28,7 @@ gcc origem.c -o origem
 
 In three separate terminals, run:
 
-```shell
+```bash
 ./comutador
 ./destino
 ./origem
