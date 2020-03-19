@@ -17,7 +17,7 @@ enum estados {
 
 // DEFINIÇÕES
 #define PORT_DESTINY "5002"
-#define PORT_ORIGIN "5002"
+#define PORT_ORIGIN "5001"
 #define HOST "127.0.0.1"
 #define BUFFER 512
 
@@ -28,3 +28,6 @@ int meuRecv(int sock, char *buffer, int BUFSIZE);
 int meuAccept(int sock, struct addrinfo *addr);
 int meuConnect(int sock, struct addrinfo *addr);
 int meuSocket();
+void comutador();
+int socketOrigem();
+int socketDestino();
