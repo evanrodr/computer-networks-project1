@@ -89,6 +89,7 @@ int meuAccept(int sock, struct addrinfo *addr) {
     }
 
     meuRecv(sock, buffer, sizeof(buffer));
+    sleep(1);
     printf("> Recebi ");
     fputs(buffer, stdout);
     printf("\n> Enviei %s\n", msgTest);
