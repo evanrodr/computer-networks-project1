@@ -17,7 +17,9 @@ int main(int argc, char const *argv[]) {
     while (estado_atual != encerrado) {
         switch (estado_atual){
             case iniciando:
+                notificarEstados(1);
                 sockDestino = socketDestino(PORT_ORIGIN);
+                notificarEstados(2);
                 sockOrigem = socketOrigem(HOST, PORT_DESTINY);
                 estado_atual = comunicando;
                 break;
@@ -34,30 +36,47 @@ int main(int argc, char const *argv[]) {
                 break;
         }
     }
-    puts("Comunicação encerrada.");
+    notificarEstados(4);
     return EXIT_SUCCESS;
+}
+
+void notificarEstados(int notif) {
+    sleep(1);
+    switch (notif) {
+        case 1:
+            puts("> Criando socket do destino.");
+            break;
+        case 2: 
+            puts("> Criando socket da origem.");
+            break;
+        case 3:
+            puts("\n> Aguardando destino e origem...");
+            break;
+        case 4:
+            puts("\n> Conexão encerrada.");
+            break;
+        default:
+            break;
+    }
 }
 
 void comutador() {
     int sendMsg,recvMsg;
     char buffer[BUFFER];
-    int i, cont = 0;  
-    
-    puts("Aguardando destino e origem...");
+    int i, cont = 0;
+
+    notificarEstados(3);
     
     while(cont < 2){
-        cont++;
-        for ( i = 0; i < 10; i++){
-            buffer[i]='\0';
-        }
+        memset(buffer, 0, sizeof(buffer));
         recvMsg = recvfrom(sockDestino, buffer, BUFFER, 0, (struct sockaddr*)&destinoRecv_addr, &destinoAddr_len);
         sendMsg = sendto(sockOrigem, buffer, BUFFER, 0, origemAddr->ai_addr, origemAddr->ai_addrlen);
         
-        for ( i = 0; i < 10; i++){
-            buffer[i]='\0';
-        }
+        memset(buffer, 0, sizeof(buffer));
         recvMsg = recvfrom(sockOrigem, buffer, BUFFER, 0, (struct sockaddr*)&origemRecv_addr, &origemAddr_len);
         sendMsg = sendto(sockDestino, buffer, BUFFER, 0, (struct sockaddr*)&destinoRecv_addr, destinoAddr_len);
+
+        cont++;
     }
 }
 

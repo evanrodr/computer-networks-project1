@@ -14,6 +14,7 @@ int main(int argc, char const *argv[]) {
     while (estado_atual != encerrado){
         switch (estado_atual) {
             case iniciando:
+                notificarEstados(1);
                 servSock = meuSocket();
                 estado_atual = comunicando;
                 break;
@@ -23,6 +24,7 @@ int main(int argc, char const *argv[]) {
             case finalizando:
                 estado_atual = encerrado;
                 close(servSock);
+                notificarEstados(4);
                 break;
             default:
                 break;
@@ -32,9 +34,29 @@ int main(int argc, char const *argv[]) {
     return EXIT_SUCCESS;
 }
 
+void notificarEstados(int notif) {
+    sleep(1);
+    switch (notif) {
+        case 1:
+            puts("> Criando socket...");
+            break;
+        case 2:
+            puts("> Esperando conexão...");
+            break;
+        case 3: 
+            puts("\n> Conexão aceita.\n");
+            break;
+        case 4: 
+            puts("\n> Conexão encerrada.");
+            break;
+        default:
+            break;
+    }
+}
+
 // DEMAIS FUNÇÕES
 int meuListen() {
-    puts("Iniciando escuta...");
+    puts("> Iniciando escuta...");
     return 0;
 }
 
@@ -44,12 +66,11 @@ int meuAccept(int sock, struct addrinfo *addr) {
     const char *msgTest = "TESTADO";
     char buffer[BUFFER];
 
-    puts("Esperando conexão...");
+    notificarEstados(2);
 
     recvMsg = recvfrom(sock, buffer, BUFFER, 0, (struct sockaddr *)&recv_addr, &addr_len);
-    printf("Recebi ");
+    printf("\n> Recebi ");
     fputs(buffer, stdout);
-    puts("\n");
 
     if (recvMsg < 0) {
         perror("Erro ao receber mensagem.\n");
@@ -63,17 +84,16 @@ int meuAccept(int sock, struct addrinfo *addr) {
             perror("Erro ao enviar mensagem.\n");
             return EXIT_FAILURE;
         }
-        printf("Enviei %s\n", msgSend);
-        puts("Conexão aceita.\n");
+        printf("\n> Enviei %s\n", msgSend);
+        notificarEstados(3);
     }
 
     meuRecv(sock, buffer, sizeof(buffer));
-    printf("Recebi ");
+    printf("> Recebi ");
     fputs(buffer, stdout);
-    printf("\nEnviei %s\n", msgTest);
+    printf("\n> Enviei %s\n", msgTest);
     meuSend(sock, (char *)msgTest, sizeof(msgTest));
     
-
     return 0;
 }
 

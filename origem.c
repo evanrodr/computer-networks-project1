@@ -12,6 +12,7 @@ int main(int argc, char const *argv[]) {
     while (estado_atual != encerrado) {
         switch (estado_atual) {
             case iniciando:
+                notificarEstados(1);
                 sock = meuSocket();
                 estado_atual = comunicando;
                 break;
@@ -20,8 +21,8 @@ int main(int argc, char const *argv[]) {
                 break;
             case finalizando:
                 estado_atual = encerrado;
-                // close(servSock);
-                // close(clntSock);
+                close(sock);
+                notificarEstados(4);
                 break;
             default:
                 break;
@@ -31,17 +32,37 @@ int main(int argc, char const *argv[]) {
     return EXIT_SUCCESS;
 }
 
+void notificarEstados(int notif) {
+    sleep(1);
+    switch (notif) {
+        case 1:
+            puts("> Criando socket...");
+            break;
+        case 2:
+            puts("> Pedindo conexão...");
+            break;
+        case 3: 
+            puts("\n\n> Conexão estabelecida.\n");
+            break;
+        case 4: 
+            puts("\n\n> Conexão encerrada.");
+            break;
+        default:
+            break;
+    }
+}
+
 int meuConnect(int sock, struct addrinfo *addr) {
     int sendMsg, recvMsg;
     const char *msgSend = "SYN";
     const char *msgTest = "TESTE";
     char buffer[BUFFER];
     
-    puts("Pedindo conexão...");
-    sleep(2);
-    printf("Enviei %s\n", msgSend);
+    notificarEstados(2);
+    sleep(1);
+    printf("\n> Enviei %s\n", msgSend);
     sendMsg = sendto(sock, msgSend, sizeof(&msgSend), 0, addr->ai_addr, addr->ai_addrlen);
-    sleep(2);
+    sleep(1);
     if(sendMsg < 0) {
         perror("Erro ao enviar mensagem\n");
         return EXIT_FAILURE;
@@ -54,19 +75,18 @@ int meuConnect(int sock, struct addrinfo *addr) {
     }
 
     if (strcmp(buffer, "SYNACK") == 0) {
-        printf("\nRecebi ");
+        printf("> Recebi ");
         fputs(buffer, stdout);
-        puts("\nConexão estabelecida.\n");
+        notificarEstados(3);
     }
 
-    sleep(2);
-    printf("Enviei %s\n", msgTest);
+    sleep(1);
+    printf("> Enviei %s\n", msgTest);
     meuSend(sock, (char *)msgTest, sizeof(msgTest));
-    sleep(2);
+    // sleep(1);
     meuRecv(sock, buffer, sizeof(buffer));
-    printf("Recebi ");
+    printf("> Recebi ");
     fputs(buffer, stdout);
-    puts("\n");
     
     return 0;
 }

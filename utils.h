@@ -21,13 +21,14 @@ enum estados {
 #define HOST "127.0.0.1"
 #define BUFFER 512
 
-// FUNC DEFINITIONS
+// FUNÇÕES
 int meuListen();
 int meuSend(int sock, char *msg, int msgLen);
 int meuRecv(int sock, char *buffer, int BUFSIZE);
 int meuAccept(int sock, struct addrinfo *addr);
 int meuConnect(int sock, struct addrinfo *addr);
 int meuSocket();
+void notificarEstados(int notif);
 void comutador();
 int socketOrigem();
 int socketDestino();
