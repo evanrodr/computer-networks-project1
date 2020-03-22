@@ -1,19 +1,21 @@
 #include "utils.h"
 
+// SOCKETS DO DESTINO E ORIGEM
 int sockDestino, sockOrigem;
 
+// INICIALIZAÇÕES
 struct addrinfo *destinoAddr;
 struct addrinfo *origemAddr;
-
 struct sockaddr_storage destinoRecv_addr;
-socklen_t destinoAddr_len = sizeof destinoRecv_addr;
-
 struct sockaddr_storage origemRecv_addr;
+socklen_t destinoAddr_len = sizeof destinoRecv_addr;
 socklen_t origemAddr_len = sizeof origemRecv_addr;
 
+// FUNÇÃO MAIN
 int main(int argc, char const *argv[]) {
     int estado_atual = iniciando;
     
+    // MAQUINA DE ESTADOS
     while (estado_atual != encerrado) {
         switch (estado_atual){
             case iniciando:
@@ -40,6 +42,7 @@ int main(int argc, char const *argv[]) {
     return EXIT_SUCCESS;
 }
 
+// NOTIFICADOR
 void notificarEstados(int notif) {
     sleep(1);
     switch (notif) {
@@ -60,6 +63,7 @@ void notificarEstados(int notif) {
     }
 }
 
+// FUNÇÃO COMUTADOR
 void comutador() {
     int sendMsg,recvMsg;
     char buffer[BUFFER];
@@ -80,6 +84,7 @@ void comutador() {
     }
 }
 
+// CRIAÇÃO DO SOCKET DE ORIGEM
 int socketOrigem(const char *ip, const char *porta) {
     struct addrinfo addrCriteria;
     memset(&addrCriteria, 0, sizeof(addrCriteria));
@@ -109,8 +114,8 @@ int socketOrigem(const char *ip, const char *porta) {
     return sock;
 }
 
+// CRIAÇÃO DO SOCKET DE DESTINO
 int socketDestino(const char *porta) {
-    
     struct addrinfo addrCriteria;
     memset(&addrCriteria, 0, sizeof(addrCriteria)); 
     addrCriteria.ai_family = AF_UNSPEC;             

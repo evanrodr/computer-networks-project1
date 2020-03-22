@@ -1,9 +1,8 @@
 #include "utils.h"
 
-// STRUCTS
+// INICIALIZAÇÕES
 struct addrinfo *addr;
 struct sockaddr_storage recv_addr;
-
 socklen_t addr_len = sizeof recv_addr;
 
 // FUNÇÃO MAIN
@@ -11,6 +10,7 @@ int main(int argc, char const *argv[]) {
     int estado_atual = iniciando;
     int servSock, clntSock;
 
+    // MÁQUINA DE ESTADOS
     while (estado_atual != encerrado){
         switch (estado_atual) {
             case iniciando:
@@ -34,6 +34,7 @@ int main(int argc, char const *argv[]) {
     return EXIT_SUCCESS;
 }
 
+// NOTIFICADOR
 void notificarEstados(int notif) {
     sleep(1);
     switch (notif) {
@@ -54,12 +55,13 @@ void notificarEstados(int notif) {
     }
 }
 
-// DEMAIS FUNÇÕES
+// FUNÇÃO meuListen
 int meuListen() {
     puts("> Iniciando escuta...");
     return 0;
 }
 
+// FUNÇÃO meuAccept
 int meuAccept(int sock, struct addrinfo *addr) {
     int sendMsg, recvMsg;
     const char *msgSend = "SYNACK";
@@ -98,16 +100,19 @@ int meuAccept(int sock, struct addrinfo *addr) {
     return 0;
 }
 
+// FUNÇÃO meuSend
 int meuSend(int sock, char *msg, int msgLen) {
     int sendMsg = sendto(sock, msg, msgLen, 0, (struct sockaddr *)&recv_addr, addr_len);
     return sendMsg;
 }
 
+// FUNÇÃO meuRecv
 int meuRecv(int sock, char *buffer, int BUFSIZE) {
     int recvMsg = recvfrom(sock, buffer, BUFSIZE, 0, (struct sockaddr *)&recv_addr, &addr_len);
     return recvMsg;
 }
 
+// CRIAÇÃO DO SOCKET COM meuSocket
 int meuSocket() {
 	struct addrinfo addrCriteria;
 	memset(&addrCriteria, 0, sizeof(addrCriteria));
