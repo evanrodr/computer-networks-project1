@@ -107,8 +107,6 @@ int socketOrigem(const char *ip, const char *porta) {
         if (sock < 0)
             continue;
         break;
-        close(sock);
-        sock = -1;
     }
     freeaddrinfo(servAddr);
     return sock;
